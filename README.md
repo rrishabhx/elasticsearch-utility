@@ -1,6 +1,6 @@
 # Elasticsearch Utility (esutility)
 
-Integrate Elasticsearch **(v5.2)** easily with your project.
+Integrate Elasticsearch (v5.2) **easily** with your project.
 
 
 ## Getting Started
@@ -9,7 +9,7 @@ Integrate Elasticsearch **(v5.2)** easily with your project.
 **Libraries (build.gradle):**
 ```
 dependencies {
-    compile 'org.elasticsearch.client:transport:5.2.2'
+    compile group: 'org.elasticsearch.client', name: 'transport', version: '5.2.2'
     compile group: 'org.json', name: 'json', version: '20180130'
     compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.8.2'
 }
@@ -27,6 +27,6 @@ ESConnection.initElasticsearch(CLUSTER_NAME, ELASTICSEARCH_IP, PORT);
 #### Utilize Elasticsearch Queries APIs
 ##### Examples:
 ```
-ESQueriesUtility.getSearchResponseForQuery("twitter", "tweet", matchAllQuery());
-ESQueriesUtility.getJSONArrayForQuery("twitter", "tweet", matchAllQuery());
+SearchResponse response = ESQueriesUtility.getSearchResponseForQuery("twitter", "tweet", matchAllQuery());
+JSONArray jsonArray = ESQueriesUtility.getJSONArrayForQuery("twitter", "tweet", matchAllQuery());
 ```
