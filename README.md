@@ -32,7 +32,7 @@ String indexName = "twitter";
 String type = "tweet";
 QueryBuilder queryBuilder = QueryBuilders.matchQuery("name", "John Doe");
 ```
-1. Index document
+#### Index document
 ```  
 JSONObject json = new JSONObject();
 json.put("name", "John Doe")
@@ -42,7 +42,7 @@ json.put("tweet", "Hello world")
 boolean status = ESQueriesUtility.indexDocument(indexName, type, null, json.toString());
 ```
 
-2. Create mapping
+#### Create mapping
 ```
 XContentBuilder mappingBuilder = jsonBuilder()
                 .startObject()
@@ -63,77 +63,77 @@ mappingBuilder.endObject().endObject();
 ESQueriesUtility.createMapping(indexName, type, mappingBuilder.string());
 ```
 
-3. Find doc Id of element at 0th index
+#### Find doc Id of element at 0th index
 ```
 String docId = ESQueriesUtility.getDocumentId(indexName, type, queryBuilder);
 ```
 
-4. Delete document
+#### Delete document
 ```
 boolean status = ESQueriesUtility.deleteDocument(indexName, type, docId);
 ```
 
-5. Delete on query match
+#### Delete on query match
 ```
 boolean status = ESQueriesUtility.deleteOnQueryMatch(indexName, type, queryBuilder);
 ```
 
-6. Delete Index
+#### Delete Index
 ```
 ESQueriesUtility.deleteIndex(indexName);
 ```
 
-7. Get JSONObject for ES doc ID
+#### Get JSONObject for ES doc ID
 ```
 JSONObject json = ESQueriesUtility.getJsonForId(indexName, type, docId);
 ```
 
-8. Get JSONObject at 0th index
+#### Get JSONObject at 0th index
 ```
 JSONObject json = ESQueriesUtility.getJsonForQuery(indexName, type, queryBuilder);
 ```
 
-9. Get SearchResponse for query
+#### Get SearchResponse for query
 ```
 SearchResponse response = ESQueriesUtility.getSearchResponseForQuery(indexName, type, queryBuilder);
 ```
 
-10. Get SearchResponse with specified source fields for query
+#### Get SearchResponse with specified source fields for query
 ```
 SearchResponse response = ESQueriesUtility.getSearchResponseForQuery(indexName, type, queryBuilder, new String[] {"name"});
 ```
 
-11. Get sorted SearchResponse for query
+#### Get sorted SearchResponse for query
 ```
 SearchResponse response = ESQueriesUtility.getSortedSearchResponseForQuery(indexName, type, queryBuilder, "name", SortOrder.ASC);
 ```
 
-12. Get JSONArray for query
+#### Get JSONArray for query
 ```
 JSONArray jsonArray = ESQueriesUtility.getJSONArrayForQuery(indexName, type, queryBuilder);
 ```
 
-13. Get JSONArray with specified source fields for query
+#### Get JSONArray with specified source fields for query
 ```
 JSONArray jsonArray = ESQueriesUtility.getJSONArrayForQuery(indexName, type, queryBuilder, new String[] {"name"});
 ```
 
-14. Get sorted JSONArray for query
+#### Get sorted JSONArray for query
 ```
 JSONArray jsonArray = ESQueriesUtility.getSortedJSONArrayForQuery(indexName, type, queryBuilder, "name", SortOrder.ASC);
 ```
 
-15. Get JSONArray utilizing Scroll API (Useful in fetching large amount of documents)
+#### Get JSONArray utilizing Scroll API (Useful in fetching large amount of documents)
 ```
 JSONArray jsonArray = ESQueriesUtility.getBulkJSONArrayForQuery(indexName, type, queryBuilder);
 ```
 
-16. Get SearchResponse for aggregation
+#### Get SearchResponse for aggregation
 ```
 SearchResponse response = ESQueriesUtility.getSearchResponseForAggregation(indexName, type, queryBuilder, aggregationBuilder);
 ```
 
-17. Update document
+#### Update document
 ```
 JSONObject updateJson = new JSONObject();
 updateJson.put("name", "Daenerys Targaryen");
@@ -143,12 +143,12 @@ String updateJsonAsString = updateJson.toString();
 boolean status = ESQueriesUtility.updateDocument(indexName, type, docId, updateJsonAsString);
 ```
 
-18. Refresh Elasticsearch index
+#### Refresh Elasticsearch index
 ```
 ESQueriesUtility.refreshElasticsearchIndex(indexName);
 ```
 
-19. Check if there is at least a single document on ES matching the query param
+#### Check if there is at least a single document on ES matching the query param
 ```
 boolean exists = ESQueriesUtility.checkIfExists(indexName, type, queryBuilder);
 ```
