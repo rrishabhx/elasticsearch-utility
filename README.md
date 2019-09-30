@@ -34,38 +34,12 @@ QueryBuilder queryBuilder = QueryBuilders.matchQuery("name", "John Doe");
 ```
 #### Index document
 ```  
-JSONObject json = new JSONObject();
-json.put("name", "John Doe")
-json.put("tweet", "Hello world")
+HashMap<String, Object> docMap = new HashMap<>();
+docMap.put("name", "John Doe")
+docMap.put("tweet", "Hello world")
 
  // Replace 'null' with a string to give a specific doc Id. Otherwise ES will assign a random doc Id
-boolean status = ESQueriesUtility.indexDocument(indexName, type, null, json.toString());
-```
-
-#### Create mapping
-```
-XContentBuilder mappingBuilder = jsonBuilder()
-                .startObject()
-                .field("properties").startObject();
-
-mappingBuilder.field("name")
-        .startObject()
-        .field("type", "keyword")
-        .endObject();
-
-mappingBuilder.field("tweet")
-        .startObject()
-        .field("type", "text")
-        .endObject();
-
-mappingBuilder.endObject().endObject();
-
-ESQueriesUtility.createMapping(indexName, type, mappingBuilder.string());
-```
-
-#### Find doc Id of element at 0th index
-```
-String docId = ESQueriesUtility.getDocumentId(indexName, type, queryBuilder);
+boolean status = ESQueriesUtility.indexDocument(indexName, type, null, docMap);
 ```
 
 #### Delete document
@@ -86,6 +60,11 @@ ESQueriesUtility.deleteIndex(indexName);
 #### Get JSONObject for ES doc ID
 ```
 JSONObject json = ESQueriesUtility.getJsonForId(indexName, type, docId);
+```
+
+#### Find doc Id of element at 0th index
+```
+String docId = ESQueriesUtility.getDocumentId(indexName, type, queryBuilder);
 ```
 
 #### Get JSONObject at 0th index
@@ -135,17 +114,45 @@ SearchResponse response = ESQueriesUtility.getSearchResponseForAggregation(index
 
 #### Update document
 ```
-JSONObject updateJson = new JSONObject();
-updateJson.put("name", "Daenerys Targaryen");
+HashMap<String, Object> updateFields = new HashMap<>();
+updateFields.put("name", "Daenerys Targaryen");
 
-String updateJsonAsString = updateJson.toString();
-
-boolean status = ESQueriesUtility.updateDocument(indexName, type, docId, updateJsonAsString);
+boolean status = ESQueriesUtility.updateDocument(indexName, type, docId, updateFields);
 ```
+
+### Update by Query
+```
+HashMap<String, Object> updateFields = new HashMap<>();
+updateFields.put("name", "John Snow");
+
+boolean status = ESQueriesUtility.updateDataOnQueryMatch(indexName, type, matchAllQuery(), updateFields)
+```
+
 
 #### Refresh Elasticsearch index
 ```
 ESQueriesUtility.refreshElasticsearchIndex(indexName);
+```
+
+#### Create mapping
+```
+XContentBuilder mappingBuilder = jsonBuilder()
+                .startObject()
+                .field("properties").startObject();
+
+mappingBuilder.field("name")
+        .startObject()
+        .field("type", "keyword")
+        .endObject();
+
+mappingBuilder.field("tweet")
+        .startObject()
+        .field("type", "text")
+        .endObject();
+
+mappingBuilder.endObject().endObject();
+
+ESQueriesUtility.createMapping(indexName, type, mappingBuilder.string());
 ```
 
 #### Check if there is at least a single document on ES matching the query param
