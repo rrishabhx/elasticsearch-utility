@@ -29,15 +29,15 @@ public class ESQueriesUtility {
     /**
      * Index document on ES
      */
-    public static boolean indexDocument(String index, String type, String esDocId, String jsonString) {
+    public static boolean indexDocument(String index, String type, String esDocId, HashMap<String, Object> documentMap) {
         IndexResponse response;
         if (esDocId == null) {
             response = client.prepareIndex(index, type)
-                    .setSource(jsonString)
+                    .setSource(documentMap)
                     .get();
         } else {
             response = client.prepareIndex(index, type, esDocId)
-                    .setSource(jsonString)
+                    .setSource(documentMap)
                     .get();
         }
 
@@ -246,11 +246,11 @@ public class ESQueriesUtility {
 
 
     /**
-     * Updates document on elasticsearch
+     * Update specified fields for single document on elasticsearch
      */
-    public static boolean updateDocument(String index, String type, String id, String updateObject) {
+    public static boolean updateDocument(String index, String type, String id, HashMap<String, Object> fieldsMap) {
         UpdateResponse response = client.prepareUpdate(index, type, id)
-                .setDoc(updateObject)
+                .setDoc(fieldsMap)
                 .get();
 
         refreshElasticsearchIndex(index);
@@ -258,11 +258,11 @@ public class ESQueriesUtility {
         return (response.status().getStatus() >= 200) && (response.status().getStatus() <= 299);
     }
 
+
     /**
-     * Update fields for all matched documents
+     * Update specified fields for all matched documents
      */
-    public static boolean updateDataOnQueryMatch(String index, String type, QueryBuilder query
-            , HashMap<String, Object> fieldsMap) {
+    public static boolean updateDataOnQueryMatch(String index, String type, QueryBuilder query, HashMap<String, Object> fieldsMap) {
         UpdateByQueryRequestBuilder requestBuilder = UpdateByQueryAction.INSTANCE
                 .newRequestBuilder(client);
 
