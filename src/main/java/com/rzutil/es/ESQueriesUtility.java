@@ -8,15 +8,16 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.reindex.BulkIndexByScrollResponse;
-import org.elasticsearch.index.reindex.DeleteByQueryAction;
-import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
+import org.elasticsearch.index.reindex.*;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
 
 public class ESQueriesUtility {
     private static TransportClient client = ESConnection.getInstance().getClient();
@@ -58,16 +59,18 @@ public class ESQueriesUtility {
 
 
     /**
-     * @return total deleted documents
+     * @return true if total deleted docs greater than 0
      */
     public static boolean deleteOnQueryMatch(String index, String type, QueryBuilder query) {
 
-        DeleteByQueryRequestBuilder deleteByQueryRequest = DeleteByQueryAction.INSTANCE
+        DeleteByQueryRequestBuilder requestBuilder = DeleteByQueryAction.INSTANCE
                 .newRequestBuilder(client);
 
-        deleteByQueryRequest.source().setIndices(index).setTypes(type);
+        requestBuilder.source().setIndices(index).setTypes(type);
 
-        BulkIndexByScrollResponse response = deleteByQueryRequest.filter(query).get();
+        BulkIndexByScrollResponse response = requestBuilder
+                .filter(query)
+                .get();
 
         refreshElasticsearchIndex(index);
 
@@ -116,7 +119,7 @@ public class ESQueriesUtility {
      */
     public static SearchResponse getSearchResponseForQuery(String index, String type, QueryBuilder query) {
         return client.prepareSearch(index).setTypes(type)
-                .setSize(10000)
+                .setSize(25000)
                 .setQuery(query)
                 .get();
     }
@@ -127,7 +130,7 @@ public class ESQueriesUtility {
      */
     public static SearchResponse getSearchResponseForQuery(String index, String type, QueryBuilder query, String[] sourceFields) {
         return client.prepareSearch(index).setTypes(type)
-                .setSize(10000)
+                .setSize(25000)
                 .setQuery(query)
                 .setFetchSource(sourceFields, null)
                 .get();
@@ -139,7 +142,7 @@ public class ESQueriesUtility {
      */
     public static SearchResponse getSortedSearchResponseForQuery(String index, String type, QueryBuilder query, String sortField, SortOrder order) {
         return client.prepareSearch(index).setTypes(type)
-                .setSize(10000)
+                .setSize(25000)
                 .setQuery(query)
                 .addSort(sortField, order)
                 .get();
@@ -253,6 +256,39 @@ public class ESQueriesUtility {
         refreshElasticsearchIndex(index);
 
         return (response.status().getStatus() >= 200) && (response.status().getStatus() <= 299);
+    }
+
+    /**
+     * Update fields for all matched documents
+     */
+    public static boolean updateDataOnQueryMatch(String index, String type, QueryBuilder query
+            , HashMap<String, Object> fieldsMap) {
+        UpdateByQueryRequestBuilder requestBuilder = UpdateByQueryAction.INSTANCE
+                .newRequestBuilder(client);
+
+        requestBuilder.source().setIndices(index).setTypes(type);
+
+        Script script = createScriptString(fieldsMap);
+
+        BulkIndexByScrollResponse response = requestBuilder
+                .script(script)
+                .filter(query)
+                .abortOnVersionConflict(false)
+                .get();
+
+        refreshElasticsearchIndex(index);
+        return response.getUpdated() > 0;
+    }
+
+    private static Script createScriptString(HashMap<String, Object> fieldsMap) {
+        StringBuilder prefix = new StringBuilder();
+
+        for (String field : fieldsMap.keySet()) {
+            Object value = fieldsMap.get(field);
+            value = value instanceof String ? "'" + value + "'" : value;
+            prefix.append("ctx._source.").append(field).append("=").append(value).append(";");
+        }
+        return new Script(prefix.toString());
     }
 
 
